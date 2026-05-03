@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() { return isSignedIn() && (request.auth.token.email == 'innocentshayar232@gmail.com' || request.auth.token.email == 'codemaxnode02@gmail.com'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // --- Projects ---
+    match /projects/{projectId} {
+      function isValidProject(data) {
+        return data.keys().hasAll(['title', 'category', 'price', 'rating', 'ratingCount', 'likes', 'thumbnail', 'description', 'features', 'screenshots'])
+          && data.title is string && data.title.size() <= 100
+          && data.category is string && data.category.size() <= 50
+          && data.price is number && data.price >= 0
+          && data.rating is number && data.rating >= 0 && data.rating <= 5
+          && data.ratingCount is number && data.ratingCount >= 0
+          && data.likes is number && data.likes >= 0
+          && data.thumbnail is string && data.thumbnail.size() <= 500
+          && data.description is string && data.description.size() <= 2000
+          && data.features is list && data.features.size() <= 20
+          && data.screenshots is list && data.screenshots.size() <= 10;
+      }
+
+      allow read: if true; // Public listings
+      allow create: if isAdmin() && isValidProject(incoming());
+      allow update: if (isAdmin() && isValidProject(incoming())) || 
+        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'rating', 'ratingCount'])); // Allow users to update metrics
+      allow delete: if isAdmin();
+      
+      // --- Reviews ---
+      match /reviews/{reviewId} {
+        function isValidReview(data) {
+          return data.keys().hasAll(['userName', 'rating', 'comment', 'date'])
+            && data.userName is string && data.userName.size() <= 50
+            && data.rating is number && data.rating >= 1 && data.rating <= 5
+            && data.comment is string && data.comment.size() <= 1000
+            && data.date is string && data.date.size() <= 20;
+        }
+
+        allow read: if true;
+        allow create: if isEmailVerified() && isValidReview(incoming());
+        allow update, delete: if isAdmin(); // Only admin can moderate reviews for now
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() { return isSignedIn() && (request.auth.token.email == 'innocentshayar232@gmail.com' || request.auth.token.email == 'codemaxnode02@gmail.com'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // --- Projects ---
+    match /projects/{projectId} {
+      function isValidProject(data) {
+        return data.keys().hasAll(['title', 'category', 'price', 'rating', 'ratingCount', 'likes', 'thumbnail', 'description', 'features', 'screenshots'])
+          && data.title is string && data.title.size() <= 200
+          && data.category is string && data.category.size() <= 100
+          && data.price is number && data.price >= 0
+          && data.rating is number && data.rating >= 0 && data.rating <= 5
+          && data.ratingCount is number && data.ratingCount >= 0
+          && data.likes is number && data.likes >= 0
+          && data.thumbnail is string && data.thumbnail.size() <= 1000
+          && data.description is string && data.description.size() <= 5000
+          && data.features is list && data.features.size() <= 50
+          && data.screenshots is list && data.screenshots.size() <= 20;
+      }
+
+      allow list: if true; 
+      allow get: if true;
+      allow create: if isAdmin() && isValidProject(incoming());
+      allow update: if (isAdmin() && isValidProject(incoming())) || 
+        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasAny(['likes', 'rating', 'ratingCount'])); 
+      allow delete: if isAdmin();
+      
+      // --- Reviews ---
+      match /reviews/{reviewId} {
+        function isValidReview(data) {
+          return data.keys().hasAll(['userName', 'rating', 'comment', 'date'])
+            && data.userName is string && data.userName.size() <= 100
+            && data.rating is number && data.rating >= 1 && data.rating <= 5
+            && data.comment is string && data.comment.size() <= 2000
+            && data.date is string && data.date.size() <= 50;
+        }
+
+        allow list: if true;
+        allow get: if true;
+        allow create: if isEmailVerified() && isValidReview(incoming());
+        allow update, delete: if isAdmin();
+      }
+    }
+    // --- Settings ---
+    match /settings/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Orders ---
+    match /orders/{orderId} {
+      function isValidOrder(data) {
+        return data.keys().hasAll(['projectId', 'projectTitle', 'customerName', 'customerEmail', 'customerPhone', 'timestamp', 'status', 'price'])
+          && data.projectId is string
+          && data.projectTitle is string
+          && data.customerName is string
+          && data.customerEmail is string
+          && data.customerPhone is string
+          && data.timestamp is string
+          && data.status in ['pending', 'completed', 'cancelled']
+          && data.price is number;
+      }
+      allow create: if true; // Customers can buy without login
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

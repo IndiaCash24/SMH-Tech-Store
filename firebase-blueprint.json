@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A software project or solution available in the store.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "rating": { "type": "number" },
+        "ratingCount": { "type": "number" },
+        "likes": { "type": "number" },
+        "thumbnail": { "type": "string" },
+        "isFlashDeal": { "type": "boolean" },
+        "description": { "type": "string" },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "screenshots": { "type": "array", "items": { "type": "string" } },
+        "demoUrl": { "type": "string" }
+      },
+      "required": ["title", "category", "price", "rating", "ratingCount", "likes", "thumbnail", "description", "features", "screenshots"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A user review for a project.",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["userName", "rating", "comment", "date"]
+    },
+    "SiteConfig": {
+      "title": "Site Configuration",
+      "description": "Global settings for the website links and contact info.",
+      "type": "object",
+      "properties": {
+        "chatLink": { "type": "string" },
+        "navLinks": { 
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "url": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A purchase record for a project.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "projectTitle": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed", "cancelled"] }
+      },
+      "required": ["projectId", "projectTitle", "customerName", "customerEmail", "timestamp", "status"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Collection of all projects."
+    },
+    "/projects/{projectId}/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Subcollection of reviews for a specific project."
+    },
+    "/settings/config": {
+      "schema": "SiteConfig",
+      "description": "Global site configuration settings."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of all purchase orders."
+    }
+  }
+}

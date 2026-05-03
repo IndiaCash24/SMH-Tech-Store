@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-title: "Sora", sans-serif;
+
+  --color-bg-dark: #0f111a;
+  --color-surface-dark: #161a26;
+  --color-surface2-dark: #1f2430;
+  --color-border-dark: #252a3d;
+  --color-text-dark: #eef0f8;
+  --color-text2-dark: #8b90ab;
+  --color-text3-dark: #555b74;
+
+  --color-accent: #7928CA;
+  --color-accent2: #FF0080;
+}
+
+@layer base {
+  body {
+    @apply transition-colors duration-300 font-sans bg-bg-dark text-text-dark;
+  }
+}
+
+/* Custom Gradients */
+@keyframes text-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.brand-gradient {
+  background: linear-gradient(to right, #FF0080, #7928CA, #4A5BC7, #00d4ff, #FF0080);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-flow 4s linear infinite;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #0f111a 0%, #161a26 100%);
+}
+
+.card-hover-shadow {
+  box-shadow: 0 8px 32px rgba(91,76,245,0.22);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-border-dark rounded-full hover:bg-accent transition-colors;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
