@@ -62,7 +62,7 @@ export default function App() {
       const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             project.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            project.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
+                            (project.features || []).some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = activeCategory === 'All' || project.category === activeCategory;
       const matchesPrice = project.price >= priceRange.min && project.price <= priceRange.max;
       
@@ -71,7 +71,8 @@ export default function App() {
       if (sortBy === 'Price: Low to High') return a.price - b.price;
       if (sortBy === 'Price: High to Low') return b.price - a.price;
       if (sortBy === 'Most Popular') return b.likes - a.likes;
-      return 0; // Default or 'Newest'
+      // Default 'Newest'
+      return Number(b.id) - Number(a.id);
     });
   }, [projects, searchQuery, activeCategory, sortBy, priceRange]);
 
@@ -88,16 +89,84 @@ export default function App() {
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
   useEffect(() => {
-    const handleOpenAdmin = () => setIsAdminPanelOpen(true);
+    const handlePopState = (e: PopStateEvent) => {
+      const state = e.state;
+      if (state?.type === 'project') {
+        setSelectedProjectId(state.id);
+        setIsAdminPanelOpen(false);
+        setIsDrawerOpen(false);
+      } else if (state?.type === 'admin') {
+        setIsAdminPanelOpen(true);
+        setSelectedProjectId(null);
+        setIsDrawerOpen(false);
+      } else if (state?.type === 'drawer') {
+        setIsDrawerOpen(true);
+        setSelectedProjectId(null);
+        setIsAdminPanelOpen(false);
+      } else {
+        setSelectedProjectId(null);
+        setIsAdminPanelOpen(false);
+        setIsDrawerOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    // Replace initial state so returning to root works
+    if (!window.history.state) {
+      window.history.replaceState({ type: 'root' }, '');
+    }
+    // Handle global event for admin panel opening
+    const handleOpenAdmin = () => openAdmin();
     window.addEventListener('open-admin-panel', handleOpenAdmin);
-    return () => window.removeEventListener('open-admin-panel', handleOpenAdmin);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('open-admin-panel', handleOpenAdmin);
+    };
   }, []);
+
+  const openProject = (id: string) => {
+    window.history.pushState({ type: 'project', id }, '');
+    setSelectedProjectId(id);
+  };
+
+  const closeProject = () => {
+    if (window.history.state?.type === 'project') {
+      window.history.back();
+    } else {
+      setSelectedProjectId(null);
+    }
+  };
+
+  const openAdmin = () => {
+    window.history.pushState({ type: 'admin' }, '');
+    setIsAdminPanelOpen(true);
+  };
+
+  const closeAdmin = () => {
+    if (window.history.state?.type === 'admin') {
+      window.history.back();
+    } else {
+      setIsAdminPanelOpen(false);
+    }
+  };
+
+  const openDrawer = () => {
+    window.history.pushState({ type: 'drawer' }, '');
+    setIsDrawerOpen(true);
+  };
+
+  const closeDrawer = () => {
+    if (window.history.state?.type === 'drawer') {
+      window.history.back();
+    } else {
+      setIsDrawerOpen(false);
+    }
+  };
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-bg-dark text-text-dark' : 'bg-bg-light text-text-light'}`}>
       <Navbar 
-        onMenuClick={toggleDrawer} 
-        onAdminClick={() => setIsAdminPanelOpen(true)}
+        onMenuClick={openDrawer} 
+        onAdminClick={openAdmin}
         onThemeToggle={toggleDarkMode} 
         isDarkMode={isDarkMode}
         searchQuery={searchQuery}
@@ -106,7 +175,7 @@ export default function App() {
       
       <AnimatePresence>
         {isDrawerOpen && (
-          <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+          <Drawer isOpen={isDrawerOpen} onClose={closeDrawer} />
         )}
       </AnimatePresence>
 
@@ -122,7 +191,7 @@ export default function App() {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ProjectGrid projects={filteredProjects} onProjectClick={(p) => setSelectedProjectId(p.id)} />
+          <ProjectGrid projects={filteredProjects} onProjectClick={(p) => openProject(p.id)} />
         </div>
       </main>
 
@@ -130,12 +199,12 @@ export default function App() {
       <WhatsAppFab />
       <ProjectModal 
         project={selectedProject} 
-        onClose={() => setSelectedProjectId(null)} 
+        onClose={closeProject} 
         onAddReview={handleAddReview}
       />
       <AdminPanel 
         isOpen={isAdminPanelOpen} 
-        onClose={() => setIsAdminPanelOpen(false)} 
+        onClose={closeAdmin} 
         projects={projects}
       />
     </div>

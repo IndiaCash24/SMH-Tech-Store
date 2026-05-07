@@ -22,6 +22,7 @@ export interface Project {
   screenshots: string[];
   demoUrl?: string;
   reviews?: Review[];
+  views?: number;
 }
 
 export type Category = 'All' | 'Business' | 'Communication' | 'Tools' | 'Games' | 'Admin';

@@ -39,10 +39,10 @@ export default function ScreenshotGallery({ screenshots }: ScreenshotGalleryProp
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedIndex(i)}
-            className="flex-shrink-0 w-48 md:w-64 aspect-[9/16] rounded-2xl overflow-hidden border border-border-dark snap-center cursor-pointer relative group"
+            className="flex-shrink-0 w-48 md:w-64 aspect-[9/16] rounded-2xl overflow-hidden border border-border-dark snap-center cursor-pointer relative group bg-surface2-dark flex items-center justify-center p-2"
           >
-            <img src={src} className="w-full h-full object-cover" alt={`Screenshot ${i + 1}`} />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <img src={src} className="w-full h-full object-contain" alt={`Screenshot ${i + 1}`} />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
               <Maximize2 className="text-white" size={24} />
             </div>
           </motion.div>

@@ -14,7 +14,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onMenuClick, onAdminClick, searchQuery, setSearchQuery }: NavbarProps) {
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function Navbar({ onMenuClick, onAdminClick, searchQuery, setSear
             <Settings size={20} className="group-hover:rotate-45 transition-transform" />
           </button>
         )}
-        {!user && (
+        {!user && !loading && (
           <button 
             onClick={signInWithGoogle}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-white text-xs font-black transition-all hover:shadow-lg shadow-accent/20"

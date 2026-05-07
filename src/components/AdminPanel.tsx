@@ -16,6 +16,7 @@ type AdminTab = 'overview' | 'products' | 'users' | 'analytics' | 'add' | 'setti
 
 export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,6 +58,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
     isFlashDeal: false
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const totalSales = projects.reduce((acc, p) => acc + (p.price * p.ratingCount * 0.4), 0);
   const totalProjects = projects.length;
@@ -73,6 +75,40 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleAddNewProjectClick = () => {
+    setEditingProjectId(null);
+    setFormData({
+      title: '',
+      category: 'Games',
+      price: '',
+      originalPrice: '',
+      description: '',
+      thumbnail: '',
+      features: [''],
+      screenshots: [''],
+      isFlashDeal: false
+    });
+    setFormError(null);
+    setSuccessMessage(null);
+    setActiveTab('add');
+  };
+
+  const handleEditProject = (project: Project) => {
+    setEditingProjectId(project.id);
+    setFormData({
+      title: project.title,
+      category: project.category,
+      price: project.price.toString(),
+      originalPrice: project.originalPrice.toString(),
+      description: project.description,
+      thumbnail: project.thumbnail,
+      features: project.features?.length ? [...project.features] : [''],
+      screenshots: project.screenshots?.length ? [...project.screenshots] : [''],
+      isFlashDeal: project.isFlashDeal || false
+    });
+    setActiveTab('add');
   };
 
   const handleAddField = (field: 'features' | 'screenshots') => {
@@ -111,8 +147,9 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
     }
 
     setIsSaving(true);
+    setSuccessMessage(null);
     try {
-      await projectService.createProject({
+      const projectData = {
         title: formData.title,
         category: formData.category,
         price: salePrice,
@@ -122,7 +159,16 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
         features: formData.features.filter(f => f.trim()),
         screenshots: formData.screenshots.filter(s => s.trim()),
         isFlashDeal: formData.isFlashDeal
-      });
+      };
+
+      if (editingProjectId) {
+        await projectService.updateProject(editingProjectId, projectData);
+        setSuccessMessage('Product updated successfully!');
+      } else {
+        await projectService.createProject(projectData);
+        setSuccessMessage('Product uploaded successfully!');
+      }
+
       setFormData({
         title: '',
         category: 'Games',
@@ -134,9 +180,13 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
         screenshots: [''],
         isFlashDeal: false
       });
-      setActiveTab('overview');
-    } catch (error) {
-      setFormError('Failed to save project. Please check your connection and try again.');
+      setTimeout(() => {
+        setSuccessMessage(null);
+        setActiveTab('overview');
+        setEditingProjectId(null);
+      }, 2000);
+    } catch (error: any) {
+      setFormError(error.message || 'Failed to save project. Please check if all fields are correct.');
       console.error(error);
     } finally {
       setIsSaving(false);
@@ -160,7 +210,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
               </div>
               <span className="text-xl font-black text-white">
                 {activeTab === 'overview' ? 'Admin Dashboard' : 
-                 activeTab === 'add' ? 'Add Product' :
+                 activeTab === 'add' ? (editingProjectId ? 'Edit Product' : 'Add Product') :
                  activeTab === 'users' ? 'User Management' :
                  activeTab === 'analytics' ? 'Performance Analytics' :
                  activeTab === 'settings' ? 'Site Configuration' :
@@ -172,7 +222,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
             <div className="flex items-center gap-3">
               {activeTab !== 'add' && (
                 <button 
-                  onClick={() => setActiveTab('add')}
+                  onClick={handleAddNewProjectClick}
                   className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-xs font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-accent/20"
                 >
                   <Plus size={16} />
@@ -269,7 +319,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                         </h3>
                         <button onClick={() => setActiveTab('products')} className="text-xs font-bold text-accent hover:underline">View All</button>
                       </div>
-                      <InventoryTable projects={projects.slice(0, 5)} onOpenDelete={setProjectToDelete} />
+                      <InventoryTable projects={projects.slice(0, 5)} onOpenDelete={setProjectToDelete} onEdit={handleEditProject} />
                     </div>
                   </div>
                   
@@ -277,7 +327,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                     <div className="bg-surface-dark border border-white/5 rounded-3xl p-6">
                       <h3 className="text-sm font-black text-white mb-4 uppercase tracking-widest">Quick Actions</h3>
                       <div className="grid grid-cols-1 gap-3">
-                        <button onClick={() => setActiveTab('add')} className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-sm font-bold text-white border border-white/5">
+                        <button onClick={handleAddNewProjectClick} className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-sm font-bold text-white border border-white/5">
                           <Plus size={18} className="text-accent" />
                           Add New Project
                         </button>
@@ -300,7 +350,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                     All Products
                   </h3>
                 </div>
-                <InventoryTable projects={projects} onOpenDelete={setProjectToDelete} />
+                <InventoryTable projects={projects} onOpenDelete={setProjectToDelete} onEdit={handleEditProject} />
               </div>
             )}
 
@@ -746,6 +796,17 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                           {formError}
                         </motion.div>
                       )}
+                      {successMessage && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex items-center gap-2 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl text-green-500 text-sm font-bold"
+                        >
+                          <Check size={18} />
+                          {successMessage}
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </div>
 
@@ -759,7 +820,7 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                     ) : (
                       <>
                         <Save size={24} className="group-hover:rotate-12 transition-transform" />
-                        Publish Product for Sale
+                        {editingProjectId ? 'Update Product Details' : 'Publish Product for Sale'}
                       </>
                     )}
                   </button>
@@ -853,7 +914,7 @@ function Star({ size, fill, className }: { size: number, fill: string, className
   );
 }
 
-function InventoryTable({ projects, onOpenDelete }: { projects: Project[], onOpenDelete: (p: Project) => void }) {
+function InventoryTable({ projects, onOpenDelete, onEdit }: { projects: Project[], onOpenDelete: (p: Project) => void, onEdit: (p: Project) => void }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left">
@@ -891,13 +952,22 @@ function InventoryTable({ projects, onOpenDelete }: { projects: Project[], onOpe
                 </div>
               </td>
               <td className="py-4 px-2 text-right">
-                <button 
-                  onClick={() => onOpenDelete(project)}
-                  className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100"
-                  title="Delete Project"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex items-center justify-end gap-1">
+                  <button 
+                    onClick={() => onEdit(project)}
+                    className="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100"
+                    title="Edit Project"
+                  >
+                    <Settings size={16} />
+                  </button>
+                  <button 
+                    onClick={() => onOpenDelete(project)}
+                    className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100"
+                    title="Delete Project"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

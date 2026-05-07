@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Project, Review } from '../types';
-import { X, ShoppingCart, Star, Heart, CheckCircle2, Download, ShieldCheck, Mail, Smartphone, Hash, Tag, Flame, Image as ImageIcon } from 'lucide-react';
+import { X, ShoppingCart, Star, Heart, CheckCircle2, Download, ShieldCheck, Mail, Smartphone, Hash, Tag, Flame, Image as ImageIcon, Zap, Eye } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import ScreenshotGallery from './ScreenshotGallery';
 import ReviewsSection from './ReviewsSection';
+import CheckoutModal from './CheckoutModal';
 import { projectService } from '../lib/projectService';
 import { orderService } from '../lib/orderService';
 
@@ -16,6 +17,7 @@ interface ProjectModalProps {
 export default function ProjectModal({ project, onClose, onAddReview }: ProjectModalProps) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   
   // Checkout Form State
@@ -30,9 +32,13 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
       const unsubscribe = projectService.subscribeToReviews(project.id, (fetchedReviews) => {
         setReviews(fetchedReviews);
       });
+      
+      // Increment views
+      projectService.incrementViews(project.id);
+      
       return () => unsubscribe();
     }
-  }, [project]);
+  }, [project?.id]);
 
   if (!project) return null;
 
@@ -63,7 +69,7 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
   };
 
   return (
-    <AnimatePresence>
+    <>
       <div className="fixed inset-0 z-[100] overflow-y-auto custom-scrollbar bg-[#0f111a]">
         <AnimatePresence>
           {isSuccess && (
@@ -95,10 +101,10 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full aspect-video rounded-3xl overflow-hidden mb-8 border border-border-dark shadow-2xl relative"
+            className="w-full aspect-video rounded-3xl overflow-hidden mb-8 border border-border-dark shadow-2xl relative bg-surface2-dark"
           >
-            <img src={project.thumbnail} alt={project.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+            <img src={project.thumbnail} alt={project.title} className="w-full h-full object-fill" />
+            <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                <div className="flex items-center gap-2">
                  <Tag size={14} className="text-accent" />
                  <span className="text-xs font-bold text-accent uppercase tracking-widest">{project.category}</span>
@@ -120,10 +126,27 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
                 <span className="text-xs font-bold ml-1">({project.ratingCount} reviews)</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Heart size={16} className="text-red-500 fill-current" />
-                <span className="text-xs font-bold">{project.likes} favorites</span>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    projectService.updateLikes(project.id, 1);
+                  }}
+                  className="flex items-center gap-1.5 hover:scale-110 active:scale-95 transition-all text-red-500"
+                >
+                  <Heart size={16} className="fill-current" />
+                  <span className="text-xs font-bold">{project.likes} favorites</span>
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 ml-2">
+                <Eye size={18} className="text-blue-400" />
+                <span className="text-sm font-bold text-white">{project.views || 0} views</span>
               </div>
             </div>
+          </div>
+
+          <div className="mb-10">
+            {/* Screenshots Section moved up here */}
+            <ScreenshotGallery screenshots={project.screenshots} />
           </div>
 
           <div className="space-y-10">
@@ -132,7 +155,7 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
               <div className="p-1 rounded-full bg-accent/10 border border-accent/20 w-max px-4 mb-4">
                 <span className="text-[10px] font-black text-accent uppercase tracking-widest">Description</span>
               </div>
-              <p className="text-text2-dark leading-relaxed text-[15px]">
+              <p className="text-text2-dark leading-relaxed text-[15px] whitespace-pre-wrap">
                 {project.description}
               </p>
             </section>
@@ -214,20 +237,31 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
                    </div>
                  </div>
  
-                 <button 
-                   type="submit"
-                   disabled={isCheckingOut}
-                   className="w-full bg-gradient-to-r from-accent to-[#7c6ef7] text-white py-5 rounded-[24px] font-black text-lg shadow-xl shadow-accent/30 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-                 >
-                   {isCheckingOut ? (
-                     <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                   ) : (
-                     <>
-                       <ShoppingCart size={24} />
-                       Pay ₹{project.price.toLocaleString()} • Secure Checkout
-                     </>
-                   )}
-                 </button>
+                 <div className="flex flex-col md:flex-row gap-4">
+                   <button 
+                     type="submit"
+                     disabled={isCheckingOut}
+                     className="flex-1 bg-surface2-dark border border-border-dark hover:border-accent text-white py-5 rounded-[24px] font-black text-lg shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                   >
+                     {isCheckingOut ? (
+                       <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                     ) : (
+                       <>
+                         <Zap size={20} fill="currentColor" />
+                         Purchase License
+                       </>
+                     )}
+                   </button>
+                   
+                   <button 
+                     type="button"
+                     onClick={() => setIsCheckoutModalOpen(true)}
+                     className="flex-1 bg-gradient-to-r from-accent to-[#7c6ef7] text-white py-5 rounded-[24px] font-black text-lg shadow-xl shadow-accent/30 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-3"
+                   >
+                     <ShoppingCart size={20} fill="currentColor" />
+                     Buy Now
+                   </button>
+                 </div>
  
                  <div className="flex justify-center gap-6 text-[10px] font-black text-text3-dark uppercase tracking-wider">
                    <span className="flex items-center gap-1.5"><ShieldCheck size={12} className="text-green-500" /> Secure UPI</span>
@@ -236,9 +270,6 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
                  </div>
                </form>
             </div>
-
-            {/* Screenshots Section */}
-            <ScreenshotGallery screenshots={project.screenshots} />
 
             {/* Ratings & Reviews Section */}
             <ReviewsSection 
@@ -279,6 +310,12 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
           </div>
         </div>
       </div>
-    </AnimatePresence>
+      
+      <CheckoutModal 
+        isOpen={isCheckoutModalOpen} 
+        onClose={() => setIsCheckoutModalOpen(false)} 
+        project={project} 
+      />
+    </>
   );
 }

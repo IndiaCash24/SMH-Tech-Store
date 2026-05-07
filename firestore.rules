@@ -34,7 +34,8 @@ service cloud.firestore {
       allow get: if true;
       allow create: if isAdmin() && isValidProject(incoming());
       allow update: if (isAdmin() && isValidProject(incoming())) || 
-        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasAny(['likes', 'rating', 'ratingCount'])); 
+        (incoming().diff(existing()).affectedKeys().hasAny(['likes', 'views'])) ||
+        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasAny(['rating', 'ratingCount'])); 
       allow delete: if isAdmin();
       
       // --- Reviews ---

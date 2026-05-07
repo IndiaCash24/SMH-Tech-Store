@@ -105,6 +105,17 @@ export const projectService = {
     }
   },
 
+  async incrementViews(projectId: string) {
+    const projectRef = doc(db, PROJECTS_COLLECTION, projectId);
+    try {
+      await updateDoc(projectRef, {
+        views: increment(1)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, PROJECTS_COLLECTION);
+    }
+  },
+
   async createProject(project: Omit<Project, 'id' | 'rating' | 'ratingCount' | 'likes'>) {
     const projectId = Date.now().toString();
     const projectRef = doc(db, PROJECTS_COLLECTION, projectId);
@@ -113,7 +124,8 @@ export const projectService = {
       id: projectId,
       rating: 0,
       ratingCount: 0,
-      likes: 0
+      likes: 0,
+      views: 0
     };
 
     try {
@@ -121,6 +133,15 @@ export const projectService = {
       return projectId;
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, PROJECTS_COLLECTION);
+    }
+  },
+
+  async updateProject(projectId: string, updates: Partial<Omit<Project, 'id'>>) {
+    const projectRef = doc(db, PROJECTS_COLLECTION, projectId);
+    try {
+      await updateDoc(projectRef, updates);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, PROJECTS_COLLECTION);
     }
   },
 

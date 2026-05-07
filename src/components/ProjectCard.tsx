@@ -1,5 +1,5 @@
 import { Project } from '../types';
-import { Star, Heart, Share2, Zap, Flame, Twitter, Facebook, Link as LinkIcon } from 'lucide-react';
+import { Star, Heart, Share2, Zap, Flame, Twitter, Facebook, Link as LinkIcon, ShoppingCart } from 'lucide-react';
 import React, { useState, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { projectService } from '../lib/projectService';
@@ -74,7 +74,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       onClick={() => onClick(project)}
       className="group bg-surface-dark border border-border-dark rounded-[24px] overflow-hidden transition-all duration-300 hover:border-accent hover:card-hover-shadow flex flex-col h-full relative cursor-pointer"
     >
-      <div className="relative aspect-square overflow-hidden bg-surface2-dark group/img">
+      <div className="relative aspect-video overflow-hidden bg-surface2-dark group/img">
         <AnimatePresence mode="wait">
           <motion.img 
             key={currentImage}
@@ -83,35 +83,9 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-fill transition-transform duration-500 group-hover:scale-105"
           />
         </AnimatePresence>
-
-        {/* Mini Gallery Overlay */}
-        {allImages.length > 1 && (
-          <div className="absolute bottom-3 right-3 flex gap-1.5 z-20">
-            {allImages.slice(0, 4).map((img, idx) => (
-              <button
-                key={idx}
-                onMouseEnter={(e) => {
-                  e.stopPropagation();
-                  setActiveImageIndex(idx);
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // No specific action needed, index already set by hover, 
-                  // but we keep it clickable for mobile
-                  setActiveImageIndex(idx);
-                }}
-                className={`w-10 h-10 rounded-lg border-2 overflow-hidden transition-all shadow-lg ${
-                  activeImageIndex === idx ? 'border-accent scale-110 shadow-accent/20' : 'border-white/10 hover:border-white/40'
-                }`}
-              >
-                <img src={img} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
-              </button>
-            ))}
-          </div>
-        )}
         
         <div className="absolute top-3 right-3 z-20">
           <Tooltip text="Share Project" position="left">
@@ -203,20 +177,19 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             </span>
           </div>
           
-          <Tooltip text={isLiked ? "Unlike Project" : "Like Project"}>
+          <Tooltip text="Like Project">
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                const newLikedState = !isLiked;
-                setIsLiked(newLikedState);
-                projectService.updateLikes(project.id, newLikedState ? 1 : -1);
+                setIsLiked(true);
+                projectService.updateLikes(project.id, 1);
               }}
               className={`ml-auto flex items-center gap-1 transition-all text-[10px] font-bold ${
                 isLiked ? 'text-red-500' : 'text-text3-dark'
-              }`}
+              } active:scale-90`}
             >
-              <Heart size={14} className={isLiked ? 'fill-current' : ''} />
-              {project.likes + (isLiked ? 1 : 0)}
+              <Heart size={14} className={isLiked ? 'fill-current text-red-500' : ''} />
+              {project.likes}
             </button>
           </Tooltip>
         </div>
@@ -235,13 +208,13 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
 
           <Tooltip text="Quick Checkout" position="left">
             <button 
-              className="flex items-center gap-1 bg-accent text-white px-3 md:px-5 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-black font-title transition-all active:scale-95 shadow-lg shadow-accent/20"
+              className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-3 md:px-5 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-black font-title transition-all duration-300 active:scale-95 shadow-lg shadow-green-600/20"
               onClick={(e) => {
                 e.stopPropagation();
                 onClick(project);
               }}
             >
-              <Zap size={12} fill="currentColor" />
+              <ShoppingCart size={14} fill="currentColor" />
               Buy Now
             </button>
           </Tooltip>

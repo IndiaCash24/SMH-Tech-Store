@@ -24,12 +24,17 @@ export default function ReviewsSection({ projectId, reviews, onAddReview }: Revi
     }
   }, [user]);
 
+  const predefinedFeedback = [
+    "Highly Recommended!",
+    "Great App, very useful.",
+    "Very Professional UI.",
+    "Excellent Support.",
+    "Smooth and fast experience.",
+    "Worth the price."
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      signInWithGoogle();
-      return;
-    }
     if (userName.trim() && comment.trim()) {
       onAddReview(projectId, userName, rating, comment);
       setComment('');
@@ -51,23 +56,13 @@ export default function ReviewsSection({ projectId, reviews, onAddReview }: Revi
           </div>
         </div>
         {!isFormOpen && (
-          user ? (
-            <button 
-              onClick={() => setIsFormOpen(true)}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs font-black transition-all border border-white/5"
-            >
-              <MessageSquarePlus size={16} />
-              Write Review
-            </button>
-          ) : (
-            <button 
-              onClick={signInWithGoogle}
-              className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-xs font-black transition-all shadow-lg shadow-accent/20"
-            >
-              <LogIn size={16} />
-              Login to Review
-            </button>
-          )
+          <button 
+            onClick={() => setIsFormOpen(true)}
+            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs font-black transition-all border border-white/5"
+          >
+            <MessageSquarePlus size={16} />
+            Write Review
+          </button>
         )}
       </div>
 
@@ -111,20 +106,29 @@ export default function ReviewsSection({ projectId, reviews, onAddReview }: Revi
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-text3-dark uppercase tracking-widest px-1">Your Feedback</label>
-                <textarea 
-                  required
-                  rows={3}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Tell others what you think about this solution..." 
-                  className="w-full bg-bg-dark border border-border-dark rounded-2xl p-4 text-white focus:ring-2 focus:ring-accent/20 outline-none transition-all placeholder:text-text3-dark text-sm resize-none" 
-                />
+                <label className="text-[11px] font-black text-text3-dark uppercase tracking-widest px-1">Select Feedback</label>
+                <div className="flex flex-wrap gap-2">
+                  {predefinedFeedback.map((fb, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setComment(fb)}
+                      className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
+                        comment === fb 
+                          ? 'bg-accent/20 border-accent/50 text-white' 
+                          : 'bg-white/5 border-white/10 text-text3-dark hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {fb}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 mt-4">
                 <button 
                   type="submit"
-                  className="flex-1 bg-accent text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-accent/20 active:scale-95 transition-all"
+                  disabled={!comment}
+                  className="flex-1 bg-accent text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-accent/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   Submit Review
                 </button>
