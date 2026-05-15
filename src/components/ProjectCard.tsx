@@ -1,5 +1,5 @@
 import { Project } from '../types';
-import { Star, Heart, Share2, Zap, Flame, Twitter, Facebook, Link as LinkIcon, ShoppingCart } from 'lucide-react';
+import { Star, Heart, Share2, Zap, Flame, Twitter, Facebook, Link as LinkIcon, ShoppingCart, Eye } from 'lucide-react';
 import React, { useState, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { projectService } from '../lib/projectService';
@@ -55,7 +55,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const currentImage = activeImageIndex === -1 ? project.thumbnail : allImages[activeImageIndex];
 
   const shareUrls = {
-    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + project.title + ' on SMH Tech!')}&url=${encodeURIComponent(window.location.href)}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + project.title + ' on SaraMash!')}&url=${encodeURIComponent(window.location.href)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
   };
 
@@ -177,21 +177,30 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             </span>
           </div>
           
-          <Tooltip text="Like Project">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsLiked(true);
-                projectService.updateLikes(project.id, 1);
-              }}
-              className={`ml-auto flex items-center gap-1 transition-all text-[10px] font-bold ${
-                isLiked ? 'text-red-500' : 'text-text3-dark'
-              } active:scale-90`}
-            >
-              <Heart size={14} className={isLiked ? 'fill-current text-red-500' : ''} />
-              {project.likes}
-            </button>
-          </Tooltip>
+          <div className="ml-auto flex items-center gap-3">
+            <Tooltip text="Like Project">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLiked(true);
+                  projectService.updateLikes(project.id, 1);
+                }}
+                className={`flex items-center gap-1.5 transition-all text-[14px] font-bold ${
+                  isLiked ? 'text-red-500 hover:scale-110' : 'text-text3-dark hover:scale-110'
+                } active:scale-90`}
+              >
+                <Heart size={22} className={`${isLiked ? 'fill-current text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'text-text3-dark'} cursor-pointer`} />
+                <span className={isLiked ? 'text-red-500' : 'text-white'}>{project.likes}</span>
+              </button>
+            </Tooltip>
+            
+            <Tooltip text="Total Views">
+              <div className="flex items-center gap-1 text-text3-dark">
+                <Eye size={15} className="text-blue-400" />
+                <span className="text-[12px] font-bold text-white/90 leading-none">{project.views || 0}</span>
+              </div>
+            </Tooltip>
+          </div>
         </div>
 
         <div className="mt-3 pt-3 border-t border-border-dark flex items-center justify-between gap-1">
@@ -206,7 +215,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             </span>
           </div>
 
-          <Tooltip text="Quick Checkout" position="left">
+          <Tooltip text="Order Now" position="left">
             <button 
               className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-3 md:px-5 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-black font-title transition-all duration-300 active:scale-95 shadow-lg shadow-green-600/20"
               onClick={(e) => {
@@ -215,7 +224,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
               }}
             >
               <ShoppingCart size={14} fill="currentColor" />
-              Buy Now
+              Order Now
             </button>
           </Tooltip>
         </div>

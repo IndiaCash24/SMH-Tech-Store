@@ -36,7 +36,7 @@ export default function Navbar({ onMenuClick, onAdminClick, searchQuery, setSear
       </button>
 
       <a href="/" className="flex-shrink-0">
-        <span className="text-[20px] font-black brand-gradient tracking-tight">SMH Tech</span>
+        <span className="text-[20px] font-black brand-gradient tracking-tight">SaraMash</span>
       </a>
 
       {/* Dynamic Nav Links */}

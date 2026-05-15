@@ -6,6 +6,11 @@ interface ScreenshotGalleryProps {
   screenshots: string[];
 }
 
+const swipeConfidenceThreshold = 10000;
+const swipePower = (offset: number, velocity: number) => {
+  return Math.abs(offset) * velocity;
+};
+
 export default function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -62,47 +67,68 @@ export default function ScreenshotGallery({ screenshots }: ScreenshotGalleryProp
             <motion.button
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute top-8 right-8 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors border border-white/10"
+              className="absolute top-4 right-4 md:top-8 md:right-8 z-[210] w-12 h-12 md:w-14 md:h-14 rounded-full bg-red-500/80 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)] hover:scale-105 backdrop-blur-md border border-red-400/50"
               onClick={() => setSelectedIndex(null)}
             >
-              <X size={24} />
+              <X size={28} className="drop-shadow-lg" />
             </motion.button>
 
             <div className="relative w-full h-full flex items-center justify-center">
               <button
                 onClick={handlePrev}
-                className="absolute left-0 z-10 w-14 h-14 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors border border-white/5 hidden md:flex"
+                className="absolute left-2 md:left-8 z-10 w-10 h-10 md:w-14 md:h-14 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors border border-white/10 backdrop-blur-sm"
               >
-                <ChevronLeft size={32} />
+                <ChevronLeft size={28} className="md:w-8 md:h-8" />
               </button>
 
               <motion.img
                 key={selectedIndex}
                 initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                animate={{ scale: 1, opacity: 1, x: 0 }}
                 exit={{ scale: 0.9, opacity: 0 }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={1}
+                onDragEnd={(e, { offset, velocity }) => {
+                  const swipe = swipePower(offset.x, velocity.x);
+                  if (swipe < -swipeConfidenceThreshold) {
+                    handleNext(e as any);
+                  } else if (swipe > swipeConfidenceThreshold) {
+                    handlePrev(e as any);
+                  }
+                }}
                 src={screenshots[selectedIndex]}
-                className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                className="max-w-full max-h-[75vh] md:max-h-[80vh] mb-24 md:mb-32 object-contain rounded-xl shadow-2xl cursor-grab active:cursor-grabbing"
                 onClick={(e) => e.stopPropagation()}
               />
 
               <button
                 onClick={handleNext}
-                className="absolute right-0 z-10 w-14 h-14 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors border border-white/5 hidden md:flex"
+                className="absolute right-2 md:right-8 z-10 w-10 h-10 md:w-14 md:h-14 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors border border-white/10 backdrop-blur-sm"
               >
-                <ChevronRight size={32} />
+                <ChevronRight size={28} className="md:w-8 md:h-8" />
               </button>
             </div>
 
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-              {screenshots.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    i === selectedIndex ? 'w-8 bg-accent' : 'bg-white/20'
-                  }`}
-                />
-              ))}
+            <div className="absolute bottom-4 left-0 right-0 z-10 px-4 pb-4">
+              <div className="flex gap-3 overflow-x-auto custom-scrollbar snap-x justify-start max-w-4xl mx-auto pb-2 px-4 shadow-[inset_0_-10px_20px_rgba(0,0,0,0.5)]">
+                {screenshots.map((src, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedIndex(i);
+                    }}
+                    className={`flex-shrink-0 w-16 h-24 md:w-20 md:h-28 rounded-lg overflow-hidden border-2 transition-all snap-center ${
+                      i === selectedIndex 
+                        ? 'border-accent shadow-[0_0_15px_rgba(99,102,241,0.5)] scale-110 z-10 relative' 
+                        : 'border-white/20 opacity-50 hover:opacity-100 hover:border-white/50'
+                    }`}
+                  >
+                    <img src={src} className="w-full h-full object-cover" alt={`Thumbnail ${i + 1}`} />
+                  </button>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}

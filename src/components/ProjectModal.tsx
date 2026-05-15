@@ -133,8 +133,8 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
                   }}
                   className="flex items-center gap-1.5 hover:scale-110 active:scale-95 transition-all text-red-500"
                 >
-                  <Heart size={16} className="fill-current" />
-                  <span className="text-xs font-bold">{project.likes} favorites</span>
+                  <Heart size={24} className="fill-current drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                  <span className="text-sm font-bold">{project.likes} Likes</span>
                 </button>
               </div>
               <div className="flex items-center gap-1.5 ml-2">
@@ -256,10 +256,10 @@ export default function ProjectModal({ project, onClose, onAddReview }: ProjectM
                    <button 
                      type="button"
                      onClick={() => setIsCheckoutModalOpen(true)}
-                     className="flex-1 bg-gradient-to-r from-accent to-[#7c6ef7] text-white py-5 rounded-[24px] font-black text-lg shadow-xl shadow-accent/30 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-3"
+                     className="flex-1 bg-green-600 hover:bg-green-500 text-white py-5 rounded-[24px] font-black text-lg shadow-xl shadow-green-600/30 active:scale-95 transition-all flex items-center justify-center gap-3"
                    >
                      <ShoppingCart size={20} fill="currentColor" />
-                     Buy Now
+                     Order Now
                    </button>
                  </div>
  

@@ -52,7 +52,7 @@ export default function Drawer({ isOpen, onClose }: DrawerProps) {
         className="fixed left-0 top-0 h-full w-[280px] bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark z-[110] flex flex-col shadow-2xl"
       >
         <div className="p-6 border-b border-border-light dark:border-border-dark flex items-center justify-between">
-          <span className="text-2xl font-extrabold brand-gradient tracking-tight">SMH Tech</span>
+          <span className="text-2xl font-extrabold brand-gradient tracking-tight">SaraMash</span>
           <button onClick={onClose} className="text-text3-light dark:text-text3-dark hover:text-accent transition-colors">
             <X size={24} />
           </button>

@@ -420,6 +420,17 @@ export default function AdminPanel({ isOpen, onClose, projects }: AdminPanelProp
                        />
                        <p className="text-[10px] text-text3-dark pl-1">This link will open when the floating chat icon is clicked on the home page.</p>
                     </div>
+                    <div className="space-y-2 mt-4">
+                       <label className="text-[10px] font-black text-text3-dark uppercase tracking-widest pl-1">Telegram Popup Link</label>
+                       <input 
+                         type="url" 
+                         value={siteConfig.telegramLink || ''}
+                         onChange={(e) => setSiteConfig({...siteConfig, telegramLink: e.target.value})}
+                         placeholder="https://t.me/your_channel"
+                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 focus:ring-accent/40"
+                       />
+                       <p className="text-[10px] text-text3-dark pl-1">This link will be used in the Telegram Popup Window.</p>
+                    </div>
                   </div>
 
                   <div className="pt-8 border-t border-white/5 space-y-6">

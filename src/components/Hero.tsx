@@ -25,7 +25,7 @@ export default function Hero() {
           className="text-4xl md:text-6xl font-black text-white leading-tight mb-4 font-title"
         >
           Elevate Your Business with <br className="hidden md:block" />
-          <span className="brand-gradient drop-shadow-2xl">SMH Tech</span>
+          <span className="brand-gradient drop-shadow-2xl">SaraMash</span>
         </motion.h1>
 
         <motion.p 

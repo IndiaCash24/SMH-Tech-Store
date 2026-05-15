@@ -8,6 +8,7 @@ export interface NavLink {
 
 export interface SiteConfig {
   chatLink: string;
+  telegramLink?: string;
   aboutLink?: string;
   supportLink?: string;
   contactLink?: string;

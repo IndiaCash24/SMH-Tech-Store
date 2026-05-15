@@ -35,6 +35,10 @@ export default function ReviewsSection({ projectId, reviews, onAddReview }: Revi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (reviews.length >= 20) {
+      setIsFormOpen(false);
+      return;
+    }
     if (userName.trim() && comment.trim()) {
       onAddReview(projectId, userName, rating, comment);
       setComment('');
@@ -55,7 +59,7 @@ export default function ReviewsSection({ projectId, reviews, onAddReview }: Revi
             <p className="text-xs text-text3-dark font-bold">{reviews.length} total reviews</p>
           </div>
         </div>
-        {!isFormOpen && (
+        {!isFormOpen && reviews.length < 20 && (
           <button 
             onClick={() => setIsFormOpen(true)}
             className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl text-xs font-black transition-all border border-white/5"

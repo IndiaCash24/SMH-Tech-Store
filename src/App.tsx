@@ -21,6 +21,7 @@ import WhatsAppFab from './components/WhatsAppFab';
 import ProjectModal from './components/ProjectModal';
 import AdminPanel from './components/AdminPanel';
 import { projectService } from './lib/projectService';
+import TelegramPopup from './components/TelegramPopup';
 
 export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -197,6 +198,7 @@ export default function App() {
 
       <Footer />
       <WhatsAppFab />
+      <TelegramPopup />
       <ProjectModal 
         project={selectedProject} 
         onClose={closeProject} 

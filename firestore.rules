@@ -17,13 +17,14 @@ service cloud.firestore {
     // --- Projects ---
     match /projects/{projectId} {
       function isValidProject(data) {
-        return data.keys().hasAll(['title', 'category', 'price', 'rating', 'ratingCount', 'likes', 'thumbnail', 'description', 'features', 'screenshots'])
+        return data.keys().hasAll(['title', 'category', 'price', 'rating', 'ratingCount', 'likes', 'views', 'thumbnail', 'description', 'features', 'screenshots'])
           && data.title is string && data.title.size() <= 200
           && data.category is string && data.category.size() <= 100
           && data.price is number && data.price >= 0
           && data.rating is number && data.rating >= 0 && data.rating <= 5
           && data.ratingCount is number && data.ratingCount >= 0
           && data.likes is number && data.likes >= 0
+          && data.views is number && data.views >= 0
           && data.thumbnail is string && data.thumbnail.size() <= 1000
           && data.description is string && data.description.size() <= 5000
           && data.features is list && data.features.size() <= 50
@@ -34,8 +35,8 @@ service cloud.firestore {
       allow get: if true;
       allow create: if isAdmin() && isValidProject(incoming());
       allow update: if (isAdmin() && isValidProject(incoming())) || 
-        (incoming().diff(existing()).affectedKeys().hasAny(['likes', 'views'])) ||
-        (isSignedIn() && incoming().diff(existing()).affectedKeys().hasAny(['rating', 'ratingCount'])); 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'views'])) ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'ratingCount'])); 
       allow delete: if isAdmin();
       
       // --- Reviews ---
@@ -50,7 +51,7 @@ service cloud.firestore {
 
         allow list: if true;
         allow get: if true;
-        allow create: if isEmailVerified() && isValidReview(incoming());
+        allow create: if isValidReview(incoming());
         allow update, delete: if isAdmin();
       }
     }
