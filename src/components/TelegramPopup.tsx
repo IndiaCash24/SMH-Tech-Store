@@ -73,7 +73,7 @@ export default function TelegramPopup() {
               </div>
 
               <div className="p-6 pt-8 text-center relative">
-                <h3 className="text-2xl font-black text-white mb-2 font-title leading-tight">SaraMash Software World</h3>
+                <h3 className="text-2xl font-black text-white mb-2 font-title leading-tight">SMH Tech Software World</h3>
                 <p className="text-sm text-text2-dark mb-6 leading-relaxed">
                   Join our official Telegram community for the latest updates, exclusive resources, and premium software discussions.
                 </p>

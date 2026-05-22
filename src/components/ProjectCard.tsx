@@ -55,7 +55,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const currentImage = activeImageIndex === -1 ? project.thumbnail : allImages[activeImageIndex];
 
   const shareUrls = {
-    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + project.title + ' on SaraMash!')}&url=${encodeURIComponent(window.location.href)}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ' + project.title + ' on SMH Tech!')}&url=${encodeURIComponent(window.location.href)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
   };
 

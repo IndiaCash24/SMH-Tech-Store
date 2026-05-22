@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-wrap gap-12 justify-between mb-12">
           <div className="max-w-xs">
-            <span className="text-2xl font-extrabold brand-gradient tracking-tight block mb-4">SaraMash</span>
+            <span className="text-2xl font-extrabold brand-gradient tracking-tight block mb-4">SMH Tech</span>
             <p className="text-sm text-text3-light dark:text-text3-dark leading-relaxed">
               Premium software solutions and professional digital assets. Helping businesses grow through technology since 2024.
             </p>
@@ -34,7 +34,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-border-light dark:border-border-dark flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-text3-light dark:text-text3-dark flex items-center gap-1">
-            © 2026 SaraMash. Built with <Heart size={12} className="text-red-500 fill-current" /> for developers.
+            © 2026 SMH Tech. Built with <Heart size={12} className="text-red-500 fill-current" /> for developers.
           </p>
 
           <div className="flex items-center gap-4">
